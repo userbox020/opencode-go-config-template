@@ -60,28 +60,8 @@ MODEL_DEFAULTS=(
 
 JSON_RUNTIME=""
 JSON_RUNTIME_BIN=""
-if command -v node >/dev/null 2>&1; then
-  JSON_RUNTIME="node"
-  JSON_RUNTIME_BIN="$(command -v node)"
-elif command -v python3 >/dev/null 2>&1 && python3 -c 'import sys; sys.exit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
-  JSON_RUNTIME="python3"
-  JSON_RUNTIME_BIN="$(command -v python3)"
-elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
-  JSON_RUNTIME="python3"
-  JSON_RUNTIME_BIN="$(command -v python)"
-else
-  echo "Installation requires Node.js or Python 3 to generate model routing; no supported runtime was found." >&2
-  exit 1
-fi
 
 MODELS=()
-if command -v "$OPENCODE_BIN" >/dev/null 2>&1; then
-  while IFS= read -r model; do
-    if [[ -n "$model" && "$model" == */* ]]; then
-      MODELS+=("$model")
-    fi
-  done < <("$OPENCODE_BIN" models "$PROVIDER" </dev/null 2>/dev/null || true)
-fi
 
 select_model() {
   local key="$1"
@@ -168,70 +148,69 @@ function writeJson(path, value) {
 }
 
 const opencode = readJson(opencodePath);
-opencode.model = primary;
+opencode.model = balanced;
 opencode.small_model = balanced;
 opencode.agent.build.model = primary;
-opencode.agent.build.variant = 'medium';
+delete opencode.agent.build.variant;
 opencode.agent.plan.model = primary;
-opencode.agent.plan.variant = 'high';
+delete opencode.agent.plan.variant;
 opencode.agent.general.model = balanced;
-opencode.agent.general.variant = 'medium';
+delete opencode.agent.general.variant;
 opencode.agent.explore.model = balanced;
-opencode.agent.explore.variant = 'low';
+delete opencode.agent.explore.variant;
 opencode.agent.title.model = balanced;
-opencode.agent.title.variant = 'low';
+delete opencode.agent.title.variant;
 opencode.agent.summary.model = balanced;
-opencode.agent.summary.variant = 'low';
+delete opencode.agent.summary.variant;
 opencode.agent.compaction.model = balanced;
-opencode.agent.compaction.variant = 'medium';
+delete opencode.agent.compaction.variant;
 writeJson(opencodePath, opencode);
 
 const slim = readJson(slimPath);
 const preset = slim.presets['generic-opencode-go'];
 preset.orchestrator.model = [
-  { id: primary, variant: 'medium' },
-  { id: balanced, variant: 'medium' },
+  { id: balanced },
+  { id: primary },
 ];
 preset.oracle.model = [
-  { id: primary, variant: 'high' },
-  { id: balanced, variant: 'high' },
+  { id: primary },
+  { id: balanced },
 ];
 preset.council.model = [
-  { id: primary, variant: 'high' },
-  { id: balanced, variant: 'high' },
+  { id: primary },
+  { id: balanced },
 ];
 preset.explorer.model = [
-  { id: balanced, variant: 'low' },
-  { id: primary, variant: 'low' },
+  { id: balanced },
+  { id: primary },
 ];
 preset.librarian.model = [
-  { id: balanced, variant: 'low' },
-  { id: primary, variant: 'low' },
+  { id: balanced },
+  { id: primary },
 ];
 preset.fixer.model = [
-  { id: primary, variant: 'high' },
-  { id: balanced, variant: 'high' },
+  { id: primary },
+  { id: balanced },
 ];
 preset.designer.model = [
-  { id: balanced, variant: 'medium' },
-  { id: primary, variant: 'medium' },
+  { id: balanced },
+  { id: primary },
 ];
-slim.agents['code-reviewer'].model = balanced;
-slim.agents['code-reviewer'].variant = 'medium';
+slim.agents['code-reviewer'].model = primary;
+delete slim.agents['code-reviewer'].variant;
 slim.agents['repo-architect'].model = primary;
-slim.agents['repo-architect'].variant = 'high';
+delete slim.agents['repo-architect'].variant;
 slim.agents['test-writer'].model = balanced;
-slim.agents['test-writer'].variant = 'low';
+delete slim.agents['test-writer'].variant;
 slim.agents['security-reviewer'].model = primary;
-slim.agents['security-reviewer'].variant = 'high';
+delete slim.agents['security-reviewer'].variant;
 const councilPreset = slim.council.presets['generic-review-board'];
-slim.council.councillor_retries = 1;
-councilPreset['deep-review'].model = primary;
-councilPreset['deep-review'].variant = 'high';
-councilPreset['fast-sanity'].model = balanced;
-councilPreset['fast-sanity'].variant = 'low';
-councilPreset['security-sanity'].model = primary;
-councilPreset['security-sanity'].variant = 'high';
+councilPreset['correctness-review'].model = primary;
+delete councilPreset['correctness-review'].variant;
+councilPreset['architecture-review'].model = primary;
+delete councilPreset['architecture-review'].variant;
+councilPreset['security-review'].model = balanced;
+delete councilPreset['security-review'].variant;
 writeJson(slimPath, slim);
 NODE
     return 0
@@ -259,56 +238,67 @@ def write_json(path, value):
         handle.write("\n")
 
 opencode = read_json(opencode_path)
-opencode["model"] = primary
+opencode["model"] = balanced
 opencode["small_model"] = balanced
-opencode["agent"]["build"].update(model=primary, variant="medium")
-opencode["agent"]["plan"].update(model=primary, variant="high")
-opencode["agent"]["general"].update(model=balanced, variant="medium")
-opencode["agent"]["explore"].update(model=balanced, variant="low")
-opencode["agent"]["title"].update(model=balanced, variant="low")
-opencode["agent"]["summary"].update(model=balanced, variant="low")
-opencode["agent"]["compaction"].update(model=balanced, variant="medium")
+for agent_name, model in {
+    "build": primary,
+    "plan": primary,
+    "general": balanced,
+    "explore": balanced,
+    "title": balanced,
+    "summary": balanced,
+    "compaction": balanced,
+}.items():
+    opencode["agent"][agent_name]["model"] = model
+    opencode["agent"][agent_name].pop("variant", None)
 write_json(opencode_path, opencode)
 
 slim = read_json(slim_path)
 preset = slim["presets"]["generic-opencode-go"]
 preset["orchestrator"]["model"] = [
-    {"id": primary, "variant": "medium"},
-    {"id": balanced, "variant": "medium"},
+    {"id": balanced},
+    {"id": primary},
 ]
 preset["oracle"]["model"] = [
-    {"id": primary, "variant": "high"},
-    {"id": balanced, "variant": "high"},
+    {"id": primary},
+    {"id": balanced},
 ]
 preset["council"]["model"] = [
-    {"id": primary, "variant": "high"},
-    {"id": balanced, "variant": "high"},
+    {"id": primary},
+    {"id": balanced},
 ]
 preset["explorer"]["model"] = [
-    {"id": balanced, "variant": "low"},
-    {"id": primary, "variant": "low"},
+    {"id": balanced},
+    {"id": primary},
 ]
 preset["librarian"]["model"] = [
-    {"id": balanced, "variant": "low"},
-    {"id": primary, "variant": "low"},
+    {"id": balanced},
+    {"id": primary},
 ]
 preset["fixer"]["model"] = [
-    {"id": primary, "variant": "high"},
-    {"id": balanced, "variant": "high"},
+    {"id": primary},
+    {"id": balanced},
 ]
 preset["designer"]["model"] = [
-    {"id": balanced, "variant": "medium"},
-    {"id": primary, "variant": "medium"},
+    {"id": balanced},
+    {"id": primary},
 ]
-slim["agents"]["code-reviewer"].update(model=balanced, variant="medium")
-slim["agents"]["repo-architect"].update(model=primary, variant="high")
-slim["agents"]["test-writer"].update(model=balanced, variant="low")
-slim["agents"]["security-reviewer"].update(model=primary, variant="high")
+for agent_name, model in {
+    "code-reviewer": primary,
+    "repo-architect": primary,
+    "test-writer": balanced,
+    "security-reviewer": primary,
+}.items():
+    slim["agents"][agent_name]["model"] = model
+    slim["agents"][agent_name].pop("variant", None)
 council_preset = slim["council"]["presets"]["generic-review-board"]
-slim["council"]["councillor_retries"] = 1
-council_preset["deep-review"].update(model=primary, variant="high")
-council_preset["fast-sanity"].update(model=balanced, variant="low")
-council_preset["security-sanity"].update(model=primary, variant="high")
+for councillor_name, model in {
+    "correctness-review": primary,
+    "architecture-review": primary,
+    "security-review": balanced,
+}.items():
+    council_preset[councillor_name]["model"] = model
+    council_preset[councillor_name].pop("variant", None)
 write_json(slim_path, slim)
 PY
     return 0
@@ -336,44 +326,72 @@ fi
 mkdir -p "$DEST_DIR"
 cp -R "$SOURCE_DIR"/. "$DEST_DIR"/
 
+CUSTOMIZE_ROUTING="0"
 if [[ "$NON_INTERACTIVE" != "1" ]]; then
   echo ""
   echo "Interactive model routing"
   echo "Provider queried: $PROVIDER"
-  if [[ ${#MODELS[@]} -gt 0 ]]; then
-    echo "Found ${#MODELS[@]} model(s) via opencode models $PROVIDER."
-  else
-    echo "No model list was available from opencode models $PROVIDER. Defaults still work if your provider supports them."
-  fi
-  if ! read -r -p "Customize model routing now? [Y/n]: " customize_answer; then
+  if ! read -r -p "Replace curated specialist routing with two selected models? [y/N]: " customize_answer; then
     customize_answer=""
   fi
   case "$customize_answer" in
-    n|N|no|NO|No)
-      NON_INTERACTIVE="1"
+    y|Y|yes|YES|Yes)
+      CUSTOMIZE_ROUTING="1"
       ;;
   esac
 fi
 
 PRIMARY_MODEL=""
 BALANCED_MODEL=""
-
 SELECTED_MODELS=()
-for index in "${!MODEL_KEYS[@]}"; do
-  selected="$(select_model "${MODEL_KEYS[$index]}" "${MODEL_TITLES[$index]}" "${MODEL_DESCRIPTIONS[$index]}" "${MODEL_DEFAULTS[$index]}")"
-  SELECTED_MODELS+=("$selected")
-done
+if [[ "$CUSTOMIZE_ROUTING" == "1" ]]; then
+  if command -v "$OPENCODE_BIN" >/dev/null 2>&1; then
+    while IFS= read -r model; do
+      if [[ -n "$model" && "$model" == */* ]]; then
+        MODELS+=("$model")
+      fi
+    done < <("$OPENCODE_BIN" models "$PROVIDER" </dev/null 2>/dev/null || true)
+  fi
 
-PRIMARY_MODEL="${SELECTED_MODELS[0]}"
-BALANCED_MODEL="${SELECTED_MODELS[1]}"
+  if command -v node >/dev/null 2>&1; then
+    JSON_RUNTIME="node"
+    JSON_RUNTIME_BIN="$(command -v node)"
+  elif command -v python3 >/dev/null 2>&1 && python3 -c 'import sys; sys.exit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
+    JSON_RUNTIME="python3"
+    JSON_RUNTIME_BIN="$(command -v python3)"
+  elif command -v python >/dev/null 2>&1 && python -c 'import sys; sys.exit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
+    JSON_RUNTIME="python3"
+    JSON_RUNTIME_BIN="$(command -v python)"
+  else
+    echo "Custom model routing requires Node.js or Python 3; no supported runtime was found." >&2
+    exit 1
+  fi
 
-apply_model_choices
+  if [[ ${#MODELS[@]} -gt 0 ]]; then
+    echo "Found ${#MODELS[@]} model(s) via opencode models $PROVIDER."
+  else
+    echo "No model list was available from opencode models $PROVIDER. You can still type full provider/model IDs."
+  fi
+
+  for index in "${!MODEL_KEYS[@]}"; do
+    selected="$(select_model "${MODEL_KEYS[$index]}" "${MODEL_TITLES[$index]}" "${MODEL_DESCRIPTIONS[$index]}" "${MODEL_DEFAULTS[$index]}")"
+    SELECTED_MODELS+=("$selected")
+  done
+
+  PRIMARY_MODEL="${SELECTED_MODELS[0]}"
+  BALANCED_MODEL="${SELECTED_MODELS[1]}"
+  apply_model_choices
+fi
 
 echo "Installed OpenCode Go generic project config to $DEST_DIR"
 echo ""
 echo "Selected model routing:"
-for index in "${!MODEL_KEYS[@]}"; do
-  echo "  ${MODEL_KEYS[$index]}: ${SELECTED_MODELS[$index]}"
-done
+if [[ "$CUSTOMIZE_ROUTING" == "1" ]]; then
+  for index in "${!MODEL_KEYS[@]}"; do
+    echo "  ${MODEL_KEYS[$index]}: ${SELECTED_MODELS[$index]}"
+  done
+else
+  echo "  curated specialist defaults"
+fi
 echo ""
 echo "Restart OpenCode in the target project so it loads the new config."

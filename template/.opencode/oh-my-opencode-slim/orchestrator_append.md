@@ -3,15 +3,17 @@
 Use this routing policy for any project using this OpenCode Go-first template.
 
 - Use OpenCode Go routing and the following role policy:
-  - **Qwen 3.7 Plus** for routine orchestration and general work.
-  - **DeepSeek V4 Flash** for high-volume exploration, documentation, titles, and summaries.
-  - **Kimi K2.7 Code** for implementation, fixing, and code-specialized tasks.
-  - **GLM 5.2** for planning, architecture, audit, and review.
-  - **DeepSeek V4 Pro** for long-context escalation and deep reasoning.
-  - **MiniMax M3** as a cheap independent fallback for explorer, librarian, and sanity checks.
-- Use medium effort for routine orchestration and implementation, and high effort for planning, fixing, and review.
-- Reserve the highest effort variants for Oracle, deep council work, or high-stakes specialist escalation.
-- Use the configured primary/deep model for demanding work and the configured fast/balanced model for routine work; route exploration, docs research, and title utilities to the fast/balanced model at low effort.
+  - **MiniMax M3** (`thinking`) for orchestration, coordination, and workflow judgment.
+  - **Qwen 3.7 Max** (`max`) for Oracle work, difficult reasoning, and correctness review.
+  - **GLM 5.2** (`max`) for planning, architecture, council synthesis, and migration review.
+  - **DeepSeek V4 Flash** (`high`) for exploration, documentation research, tests, and scoped implementation.
+  - **Kimi K2.7 Code** for code-specialized implementation and UI work.
+  - **MiMo V2.5** for Observer image, video, and visual analysis.
+  - **DeepSeek V4 Pro** (`max`) for defensive security review and deep escalation.
+  - **Qwen 3.7 Plus** as the balanced general model and orchestration fallback.
+- Use only variants exposed by the selected model. Do not invent generic effort variants for Kimi K2.7 Code, MiMo V2.5, or Qwen 3.7 Plus.
+- Reserve maximum reasoning for Oracle, council synthesis, architecture, security, and high-stakes review.
+- Prefer DeepSeek V4 Flash for high-volume work; avoid routing routine tasks to low-allowance premium models merely because they are newer.
 - Delegate focused second-pass work instead of making one agent solve every concern.
 - Use `@code-reviewer` for correctness, regression, maintainability, edge-case, and test-gap review.
 - Use `@repo-architect` for architecture decisions, migrations, module boundaries, API contracts, and sequencing.

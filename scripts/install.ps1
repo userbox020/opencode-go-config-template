@@ -135,72 +135,71 @@ function Apply-ModelChoices {
   $Primary = $Models["primary"]
   $Balanced = $Models["balanced"]
 
-  $OpenCodeConfig.model = $Primary
+  $OpenCodeConfig.model = $Balanced
   $OpenCodeConfig.small_model = $Balanced
   $OpenCodeConfig.agent.build.model = $Primary
-  $OpenCodeConfig.agent.build.variant = "medium"
+  $OpenCodeConfig.agent.build.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.plan.model = $Primary
-  $OpenCodeConfig.agent.plan.variant = "high"
+  $OpenCodeConfig.agent.plan.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.general.model = $Balanced
-  $OpenCodeConfig.agent.general.variant = "medium"
+  $OpenCodeConfig.agent.general.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.explore.model = $Balanced
-  $OpenCodeConfig.agent.explore.variant = "low"
+  $OpenCodeConfig.agent.explore.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.title.model = $Balanced
-  $OpenCodeConfig.agent.title.variant = "low"
+  $OpenCodeConfig.agent.title.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.summary.model = $Balanced
-  $OpenCodeConfig.agent.summary.variant = "low"
+  $OpenCodeConfig.agent.summary.PSObject.Properties.Remove("variant")
   $OpenCodeConfig.agent.compaction.model = $Balanced
-  $OpenCodeConfig.agent.compaction.variant = "medium"
+  $OpenCodeConfig.agent.compaction.PSObject.Properties.Remove("variant")
   ConvertTo-PrettyJsonFile -InputObject $OpenCodeConfig -Path $OpenCodeConfigPath
 
   $SlimConfig = Get-Content -LiteralPath $SlimConfigPath -Raw | ConvertFrom-Json
   $Preset = $SlimConfig.presets."generic-opencode-go"
   $Preset.orchestrator.model = @(
-    [pscustomobject]@{ id = $Primary; variant = "medium" },
-    [pscustomobject]@{ id = $Balanced; variant = "medium" }
+    [pscustomobject]@{ id = $Balanced },
+    [pscustomobject]@{ id = $Primary }
   )
   $Preset.oracle.model = @(
-    [pscustomobject]@{ id = $Primary; variant = "high" },
-    [pscustomobject]@{ id = $Balanced; variant = "high" }
+    [pscustomobject]@{ id = $Primary },
+    [pscustomobject]@{ id = $Balanced }
   )
   $Preset.council.model = @(
-    [pscustomobject]@{ id = $Primary; variant = "high" },
-    [pscustomobject]@{ id = $Balanced; variant = "high" }
+    [pscustomobject]@{ id = $Primary },
+    [pscustomobject]@{ id = $Balanced }
   )
   $Preset.explorer.model = @(
-    [pscustomobject]@{ id = $Balanced; variant = "low" },
-    [pscustomobject]@{ id = $Primary; variant = "low" }
+    [pscustomobject]@{ id = $Balanced },
+    [pscustomobject]@{ id = $Primary }
   )
   $Preset.librarian.model = @(
-    [pscustomobject]@{ id = $Balanced; variant = "low" },
-    [pscustomobject]@{ id = $Primary; variant = "low" }
+    [pscustomobject]@{ id = $Balanced },
+    [pscustomobject]@{ id = $Primary }
   )
   $Preset.fixer.model = @(
-    [pscustomobject]@{ id = $Primary; variant = "high" },
-    [pscustomobject]@{ id = $Balanced; variant = "high" }
+    [pscustomobject]@{ id = $Primary },
+    [pscustomobject]@{ id = $Balanced }
   )
   $Preset.designer.model = @(
-    [pscustomobject]@{ id = $Balanced; variant = "medium" },
-    [pscustomobject]@{ id = $Primary; variant = "medium" }
+    [pscustomobject]@{ id = $Balanced },
+    [pscustomobject]@{ id = $Primary }
   )
 
-  $SlimConfig.agents."code-reviewer".model = $Balanced
-  $SlimConfig.agents."code-reviewer".variant = "medium"
+  $SlimConfig.agents."code-reviewer".model = $Primary
+  $SlimConfig.agents."code-reviewer".PSObject.Properties.Remove("variant")
   $SlimConfig.agents."repo-architect".model = $Primary
-  $SlimConfig.agents."repo-architect".variant = "high"
+  $SlimConfig.agents."repo-architect".PSObject.Properties.Remove("variant")
   $SlimConfig.agents."test-writer".model = $Balanced
-  $SlimConfig.agents."test-writer".variant = "low"
+  $SlimConfig.agents."test-writer".PSObject.Properties.Remove("variant")
   $SlimConfig.agents."security-reviewer".model = $Primary
-  $SlimConfig.agents."security-reviewer".variant = "high"
+  $SlimConfig.agents."security-reviewer".PSObject.Properties.Remove("variant")
 
   $CouncilPreset = $SlimConfig.council.presets."generic-review-board"
-  $SlimConfig.council.councillor_retries = 1
-  $CouncilPreset."deep-review".model = $Primary
-  $CouncilPreset."deep-review".variant = "high"
-  $CouncilPreset."fast-sanity".model = $Balanced
-  $CouncilPreset."fast-sanity".variant = "low"
-  $CouncilPreset."security-sanity".model = $Primary
-  $CouncilPreset."security-sanity".variant = "high"
+  $CouncilPreset."correctness-review".model = $Primary
+  $CouncilPreset."correctness-review".PSObject.Properties.Remove("variant")
+  $CouncilPreset."architecture-review".model = $Primary
+  $CouncilPreset."architecture-review".PSObject.Properties.Remove("variant")
+  $CouncilPreset."security-review".model = $Balanced
+  $CouncilPreset."security-review".PSObject.Properties.Remove("variant")
   ConvertTo-PrettyJsonFile -InputObject $SlimConfig -Path $SlimConfigPath
 }
 
@@ -226,38 +225,44 @@ if (-not (Test-Path -LiteralPath $Destination)) {
 
 Get-ChildItem -LiteralPath $Source -Force | Copy-Item -Destination $Destination -Recurse -Force
 
-$OpenCodeCommand = Get-OpenCodeCommand
-$AvailableModels = Get-AvailableModels -OpenCodeCommand $OpenCodeCommand -ProviderName $Provider
-$SkipModelPrompt = $NonInteractive
+$CustomizeRouting = $false
 
 if (-not $NonInteractive) {
   ""
   "Interactive model routing"
   "Provider queried: $Provider"
-  if ($AvailableModels.Count -gt 0) {
-    "Found $($AvailableModels.Count) model(s) via opencode models $Provider."
-  } else {
-    "No model list was available from opencode models $Provider. Defaults still work if your provider supports them."
-  }
-
-  $CustomizeAnswer = Read-Host "Customize model routing now? [Y/n]"
-  if ($CustomizeAnswer.Trim() -match "^(n|no)$") {
-    $SkipModelPrompt = $true
+  $CustomizeAnswer = Read-Host "Replace curated specialist routing with two selected models? [y/N]"
+  if ($CustomizeAnswer.Trim() -match "^(y|yes)$") {
+    $CustomizeRouting = $true
   }
 }
 
 $SelectedModels = @{}
-foreach ($Slot in $ModelSlots) {
-  $SelectedModels[$Slot["Key"]] = Select-Model -Slot $Slot -AvailableModels $AvailableModels -SkipPrompt:$SkipModelPrompt
-}
+if ($CustomizeRouting) {
+  $OpenCodeCommand = Get-OpenCodeCommand
+  $AvailableModels = Get-AvailableModels -OpenCodeCommand $OpenCodeCommand -ProviderName $Provider
+  if ($AvailableModels.Count -gt 0) {
+    "Found $($AvailableModels.Count) model(s) via opencode models $Provider."
+  } else {
+    "No model list was available from opencode models $Provider. You can still type full provider/model IDs."
+  }
 
-Apply-ModelChoices -DestinationPath $Destination -Models $SelectedModels
+  foreach ($Slot in $ModelSlots) {
+    $SelectedModels[$Slot["Key"]] = Select-Model -Slot $Slot -AvailableModels $AvailableModels
+  }
+
+  Apply-ModelChoices -DestinationPath $Destination -Models $SelectedModels
+}
 
 "Installed OpenCode Go generic project config to $Destination"
 ""
 "Selected model routing:"
-foreach ($Slot in $ModelSlots) {
-  "  $($Slot["Key"]): $($SelectedModels[$Slot["Key"]])"
+if ($CustomizeRouting) {
+  foreach ($Slot in $ModelSlots) {
+    "  $($Slot["Key"]): $($SelectedModels[$Slot["Key"]])"
+  }
+} else {
+  "  curated specialist defaults"
 }
 ""
 "Restart OpenCode in the target project so it loads the new config."

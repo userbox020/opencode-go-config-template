@@ -7,7 +7,7 @@
   "small_model": "opencode-go/deepseek-v4-flash",
   "default_agent": "orchestrator",
   "plugin": [
-    "oh-my-opencode-slim"
+    "oh-my-opencode-slim@2.2.8"
   ],
   "skills": {
     "paths": [
@@ -19,32 +19,27 @@
   ],
   "agent": {
     "build": {
-      "model": "opencode-go/kimi-k2.7-code",
-      "variant": "high"
+      "model": "opencode-go/kimi-k2.7-code"
     },
     "plan": {
       "model": "opencode-go/glm-5.2",
-      "variant": "high"
+      "variant": "max"
     },
     "general": {
-      "model": "opencode-go/qwen3.7-plus",
-      "variant": "medium"
+      "model": "opencode-go/qwen3.7-plus"
     },
     "explore": {
       "model": "opencode-go/deepseek-v4-flash",
-      "variant": "low"
+      "variant": "high"
     },
     "title": {
-      "model": "opencode-go/deepseek-v4-flash",
-      "variant": "low"
+      "model": "opencode-go/deepseek-v4-flash"
     },
     "summary": {
-      "model": "opencode-go/deepseek-v4-flash",
-      "variant": "low"
+      "model": "opencode-go/deepseek-v4-flash"
     },
     "compaction": {
-      "model": "opencode-go/deepseek-v4-flash",
-      "variant": "medium"
+      "model": "opencode-go/deepseek-v4-flash"
     }
   },
   "compaction": {

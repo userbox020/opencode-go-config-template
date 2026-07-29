@@ -9,12 +9,14 @@ This workspace is for authorized software engineering on the current project.
 - Do not publish packages, push branches, deploy infrastructure, touch production systems, broadcast transactions, or run destructive cleanup without explicit current-turn authorization.
 - Prefer read-only analysis first, then minimal edits, then verification with the repository's existing tooling.
 - Use OpenCode Go routing and the following role policy:
-  - **Qwen 3.7 Plus** for routine orchestration and general work.
-  - **DeepSeek V4 Flash** for high-volume exploration, documentation, titles, and summaries.
-  - **Kimi K2.7 Code** for implementation, fixing, and code-specialized tasks.
-  - **GLM 5.2** for planning, architecture, audit, and review.
-  - **DeepSeek V4 Pro** for long-context escalation and deep reasoning.
-  - **MiniMax M3** as a cheap independent fallback for explorer, librarian, and sanity checks.
+  - **MiniMax M3** (`thinking`) for orchestration, coordination, and workflow judgment.
+  - **Qwen 3.7 Max** (`max`) for Oracle work, difficult reasoning, and correctness review.
+  - **GLM 5.2** (`max`) for planning, architecture, council synthesis, and migration review.
+  - **DeepSeek V4 Flash** (`high`) for exploration, documentation research, tests, and scoped implementation; omit the variant for titles, summaries, and compaction.
+  - **Kimi K2.7 Code** for code-specialized implementation and UI work without forcing an unsupported variant.
+  - **MiMo V2.5** for Observer image, video, and visual analysis.
+  - **DeepSeek V4 Pro** (`max`) for defensive security review and deep escalation.
+  - **Qwen 3.7 Plus** as the balanced general model and orchestration fallback.
 - Use `@code-reviewer`, `@repo-architect`, `@test-writer`, `@security-reviewer`, `@oracle`, and council members for second-pass checks when the work benefits from focused review.
 - Keep security work defensive and scoped to repositories, systems, and targets the user is authorized to review.
 - If a request cannot be handled safely, reframe it into defensive validation, remediation, test design, or documentation.

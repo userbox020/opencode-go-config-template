@@ -1,11 +1,14 @@
 {
-  "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.2.8/oh-my-opencode-slim.schema.json",
   "preset": "generic-opencode-go",
   "autoUpdate": false,
+  "disabled_agents": [],
+  "image_routing": "auto",
   "fallback": {
     "enabled": true,
     "timeoutMs": 30000,
     "retryDelayMs": 500,
+    "maxRetries": 1,
     "retry_on_empty": true
   },
   "backgroundJobs": {
@@ -18,12 +21,11 @@
       "orchestrator": {
         "model": [
           {
-            "id": "opencode-go/qwen3.7-plus",
-            "variant": "medium"
+            "id": "opencode-go/minimax-m3",
+            "variant": "thinking"
           },
           {
-            "id": "opencode-go/glm-5.2",
-            "variant": "high"
+            "id": "opencode-go/qwen3.7-plus"
           }
         ],
         "skills": [
@@ -34,12 +36,12 @@
       "oracle": {
         "model": [
           {
-            "id": "opencode-go/glm-5.2",
-            "variant": "high"
+            "id": "opencode-go/qwen3.7-max",
+            "variant": "max"
           },
           {
-            "id": "opencode-go/deepseek-v4-pro",
-            "variant": "high"
+            "id": "opencode-go/glm-5.2",
+            "variant": "max"
           }
         ],
         "skills": [],
@@ -49,11 +51,11 @@
         "model": [
           {
             "id": "opencode-go/glm-5.2",
-            "variant": "high"
+            "variant": "max"
           },
           {
             "id": "opencode-go/deepseek-v4-pro",
-            "variant": "high"
+            "variant": "max"
           }
         ],
         "skills": [],
@@ -63,11 +65,10 @@
         "model": [
           {
             "id": "opencode-go/deepseek-v4-flash",
-            "variant": "low"
+            "variant": "high"
           },
           {
-            "id": "opencode-go/minimax-m3",
-            "variant": "low"
+            "id": "opencode-go/minimax-m2.7"
           }
         ],
         "skills": [
@@ -79,11 +80,10 @@
         "model": [
           {
             "id": "opencode-go/deepseek-v4-flash",
-            "variant": "low"
+            "variant": "high"
           },
           {
-            "id": "opencode-go/minimax-m3",
-            "variant": "low"
+            "id": "opencode-go/mimo-v2.5"
           }
         ],
         "skills": [],
@@ -92,12 +92,11 @@
       "fixer": {
         "model": [
           {
-            "id": "opencode-go/kimi-k2.7-code",
+            "id": "opencode-go/deepseek-v4-flash",
             "variant": "high"
           },
           {
-            "id": "opencode-go/glm-5.2",
-            "variant": "high"
+            "id": "opencode-go/kimi-k2.7-code"
           }
         ],
         "skills": [
@@ -108,12 +107,23 @@
       "designer": {
         "model": [
           {
-            "id": "opencode-go/qwen3.7-plus",
-            "variant": "medium"
+            "id": "opencode-go/kimi-k2.7-code"
           },
           {
-            "id": "opencode-go/kimi-k2.7-code",
-            "variant": "medium"
+            "id": "opencode-go/minimax-m3",
+            "variant": "thinking"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      },
+      "observer": {
+        "model": [
+          {
+            "id": "opencode-go/mimo-v2.5"
+          },
+          {
+            "id": "opencode-go/qwen3.7-plus"
           }
         ],
         "skills": [],
@@ -123,8 +133,16 @@
   },
   "agents": {
     "code-reviewer": {
-      "model": "opencode-go/qwen3.7-plus",
-      "variant": "high",
+      "model": [
+        {
+          "id": "opencode-go/qwen3.7-max",
+          "variant": "max"
+        },
+        {
+          "id": "opencode-go/deepseek-v4-pro",
+          "variant": "max"
+        }
+      ],
       "skills": [
         "project-workflow"
       ],
@@ -133,8 +151,16 @@
       "orchestratorPrompt": "@code-reviewer\n- Role: General code-review specialist for diffs, implementation plans, patches, refactors, and test quality.\n- Delegate when: a change needs second-pass review for correctness, maintainability, regressions, edge cases, or missing tests.\n- Expected output: findings ordered by severity, affected files, rationale, suggested fixes, and residual risks.\n- Do not delegate when: broad repository discovery or initial implementation is still needed."
     },
     "repo-architect": {
-      "model": "opencode-go/glm-5.2",
-      "variant": "high",
+      "model": [
+        {
+          "id": "opencode-go/glm-5.2",
+          "variant": "max"
+        },
+        {
+          "id": "opencode-go/qwen3.7-max",
+          "variant": "max"
+        }
+      ],
       "skills": [
         "project-workflow"
       ],
@@ -143,8 +169,15 @@
       "orchestratorPrompt": "@repo-architect\n- Role: Architecture and migration reviewer for module boundaries, API contracts, data flow, and technical tradeoffs.\n- Delegate when: the user asks for design choices, large refactors, migrations, dependency boundaries, or implementation sequencing.\n- Expected output: recommended approach, alternatives, risks, migration steps, and verification plan.\n- Do not delegate when: the task is a small isolated edit."
     },
     "test-writer": {
-      "model": "opencode-go/deepseek-v4-flash",
-      "variant": "medium",
+      "model": [
+        {
+          "id": "opencode-go/deepseek-v4-flash",
+          "variant": "high"
+        },
+        {
+          "id": "opencode-go/kimi-k2.7-code"
+        }
+      ],
       "skills": [
         "project-workflow"
       ],
@@ -153,8 +186,16 @@
       "orchestratorPrompt": "@test-writer\n- Role: Test strategy and regression coverage specialist.\n- Delegate when: new code needs targeted tests, a bug needs reproduction, or existing coverage needs gap analysis.\n- Expected output: concrete tests to add, fixtures, edge cases, expected failures, and commands to run.\n- Do not delegate when: the repository's test framework has not been identified yet."
     },
     "security-reviewer": {
-      "model": "opencode-go/glm-5.2",
-      "variant": "high",
+      "model": [
+        {
+          "id": "opencode-go/deepseek-v4-pro",
+          "variant": "max"
+        },
+        {
+          "id": "opencode-go/glm-5.2",
+          "variant": "max"
+        }
+      ],
       "skills": [
         "project-workflow"
       ],
@@ -165,24 +206,21 @@
   },
   "council": {
     "default_preset": "generic-review-board",
-    "timeout": 180000,
-    "councillor_execution_mode": "parallel",
-    "councillor_retries": 1,
     "presets": {
       "generic-review-board": {
-        "deep-review": {
+        "correctness-review": {
+          "model": "opencode-go/qwen3.7-max",
+          "variant": "max",
+          "prompt": "Review the proposed change for correctness, regressions, edge cases, and test adequacy. Keep findings concrete and scoped."
+        },
+        "architecture-review": {
           "model": "opencode-go/glm-5.2",
-          "variant": "high",
-          "prompt": "Review the proposed change for correctness, maintainability, regression risk, test adequacy, and operational safety. Keep findings concrete and scoped."
+          "variant": "max",
+          "prompt": "Review module boundaries, maintainability, migration risk, and operational safety. Keep tradeoffs concrete."
         },
-        "fast-sanity": {
-          "model": "opencode-go/deepseek-v4-flash",
-          "variant": "low",
-          "prompt": "Check for obvious bugs, missing code references, unclear assumptions, and missing verification steps."
-        },
-        "security-sanity": {
+        "security-review": {
           "model": "opencode-go/deepseek-v4-pro",
-          "variant": "high",
+          "variant": "max",
           "prompt": "Check the summary or diff defensively for secrets handling, authorization, unsafe IO, dependency risk, and deployment hazards. Do not provide operational abuse steps."
         }
       }
