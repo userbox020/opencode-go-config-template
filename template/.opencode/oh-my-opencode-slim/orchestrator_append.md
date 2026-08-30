@@ -2,18 +2,15 @@
 
 Use this routing policy for any project using this OpenCode Go-first template.
 
-- Use OpenCode Go routing and the following role policy:
-  - **MiniMax M3** (`thinking`) for orchestration, coordination, and workflow judgment.
-  - **Qwen 3.7 Max** (`max`) for Oracle work, difficult reasoning, and correctness review.
-  - **GLM 5.2** (`max`) for planning, architecture, council synthesis, and migration review.
-  - **DeepSeek V4 Flash** (`high`) for exploration, documentation research, tests, and scoped implementation.
-  - **Kimi K2.7 Code** for code-specialized implementation and UI work.
-  - **MiMo V2.5** for Observer image, video, and visual analysis.
-  - **DeepSeek V4 Pro** (`max`) for defensive security review and deep escalation.
-  - **Qwen 3.7 Plus** as the balanced general model and orchestration fallback.
-- Use only variants exposed by the selected model. Do not invent generic effort variants for Kimi K2.7 Code, MiMo V2.5, or Qwen 3.7 Plus.
+- Use the selected OpenCode Go profile. Balanced is the default; quality deliberately uses lower-allowance premium models more often.
+- Treat the configured agent models as authoritative. If two-model customization was selected during installation, use those custom routes instead of the curated mappings described below.
+- Balanced routing uses **MiniMax M3** (`thinking`) for orchestration, **Qwen3.8 Flash** for balanced work, **LongCat 2.0** for high-volume exploration and research, **GLM-5.3 Flash** (`max`) for planning, and **Kimi K2.7 Code** for implementation.
+- Quality routing uses **Qwen3.8 Max** for orchestration and difficult reasoning, **GLM-5.3** (`max`) for planning and architecture, **Qwen3.8 Flash** for exploration, and **Kimi K2.7 Code** for implementation.
+- Balanced observation uses **MiMo V2.5** first and Qwen3.8 Flash as fallback. Quality observation uses **Qwen3.8 Max** first and MiMo V2.5 as fallback.
+- Use **DeepSeek V4 Pro** (`max`) for defensive security review and **DeepSeek V4 Flash** (`high`) as an economical exploration fallback.
+- Use only variants exposed by the selected model. Do not invent generic variants for Kimi K2.7 Code, MiMo V2.5, or Qwen3.7 Max.
 - Reserve maximum reasoning for Oracle, council synthesis, architecture, security, and high-stakes review.
-- Prefer DeepSeek V4 Flash for high-volume work; avoid routing routine tasks to low-allowance premium models merely because they are newer.
+- Prefer LongCat 2.0 and Qwen3.8 Flash for high-volume work; avoid routing routine balanced-profile tasks to low-allowance premium models merely because they are newer.
 - Delegate focused second-pass work instead of making one agent solve every concern.
 - Use `@code-reviewer` for correctness, regression, maintainability, edge-case, and test-gap review.
 - Use `@repo-architect` for architecture decisions, migrations, module boundaries, API contracts, and sequencing.

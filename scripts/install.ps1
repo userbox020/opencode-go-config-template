@@ -2,6 +2,7 @@ param(
   [string]$ProjectPath = (Get-Location).Path,
   [switch]$Force,
   [switch]$NonInteractive,
+  [string]$Profile = "",
   [string]$Provider = "opencode-go"
 )
 
@@ -12,13 +13,13 @@ $ModelSlots = @(
     Key = "primary"
     Title = "Primary and deep reasoning"
     Description = "Planning, fixing, Oracle, architecture, and high-stakes specialist work."
-    Default = "opencode-go/glm-5.2"
+    Default = "opencode-go/glm-5.3-flash"
   },
   [ordered]@{
     Key = "balanced"
     Title = "Fast and balanced work"
     Description = "Routine orchestration, general work, exploration, docs, design, titles, summaries, and compaction."
-    Default = "opencode-go/qwen3.7-plus"
+    Default = "opencode-go/qwen3.8-flash"
   }
 )
 
@@ -122,10 +123,47 @@ function ConvertTo-PrettyJsonFile {
   [System.IO.File]::WriteAllText($Path, ($Json + [Environment]::NewLine), $Utf8NoBom)
 }
 
+function Apply-CuratedProfile {
+  param(
+    [string]$DestinationPath,
+    [string]$ProfileName
+  )
+
+  if ($ProfileName -eq "balanced") {
+    return
+  }
+
+  $OpenCodeConfigPath = Join-Path -Path $DestinationPath -ChildPath "opencode.jsonc"
+  $SlimConfigPath = Join-Path -Path $DestinationPath -ChildPath "oh-my-opencode-slim.jsonc"
+  $OpenCodeConfig = Get-Content -LiteralPath $OpenCodeConfigPath -Raw | ConvertFrom-Json
+
+  $OpenCodeConfig.model = "opencode-go/qwen3.8-max"
+  $OpenCodeConfig.small_model = "opencode-go/qwen3.8-flash"
+  $OpenCodeConfig.agent.build.model = "opencode-go/kimi-k2.7-code"
+  $OpenCodeConfig.agent.build.PSObject.Properties.Remove("variant")
+  $OpenCodeConfig.agent.plan.model = "opencode-go/glm-5.3"
+  $OpenCodeConfig.agent.plan.variant = "max"
+  $OpenCodeConfig.agent.general.model = "opencode-go/qwen3.8-max"
+  $OpenCodeConfig.agent.general.variant = "medium"
+  $OpenCodeConfig.agent.explore.model = "opencode-go/qwen3.8-flash"
+  $OpenCodeConfig.agent.explore.variant = "medium"
+  foreach ($AgentName in @("title", "summary", "compaction")) {
+    $OpenCodeConfig.agent.$AgentName.model = "opencode-go/qwen3.8-flash"
+    $OpenCodeConfig.agent.$AgentName.variant = "low"
+  }
+  ConvertTo-PrettyJsonFile -InputObject $OpenCodeConfig -Path $OpenCodeConfigPath
+
+  $SlimConfig = Get-Content -LiteralPath $SlimConfigPath -Raw | ConvertFrom-Json
+  $SlimConfig.preset = "quality"
+  ConvertTo-PrettyJsonFile -InputObject $SlimConfig -Path $SlimConfigPath
+}
+
 function Apply-ModelChoices {
   param(
     [string]$DestinationPath,
-    [hashtable]$Models
+    [hashtable]$Models,
+    [ValidateSet("balanced", "quality")]
+    [string]$ProfileName
   )
 
   $OpenCodeConfigPath = Join-Path -Path $DestinationPath -ChildPath "opencode.jsonc"
@@ -134,7 +172,9 @@ function Apply-ModelChoices {
   $OpenCodeConfig = Get-Content -LiteralPath $OpenCodeConfigPath -Raw | ConvertFrom-Json
   $Primary = $Models["primary"]
   $Balanced = $Models["balanced"]
+  $CustomProviders = @($Primary, $Balanced) | ForEach-Object { ($_ -split "/", 2)[0] } | Select-Object -Unique
 
+  $OpenCodeConfig.enabled_providers = @("opencode-go") + @($CustomProviders | Where-Object { $_ -ne "opencode-go" })
   $OpenCodeConfig.model = $Balanced
   $OpenCodeConfig.small_model = $Balanced
   $OpenCodeConfig.agent.build.model = $Primary
@@ -154,35 +194,38 @@ function Apply-ModelChoices {
   ConvertTo-PrettyJsonFile -InputObject $OpenCodeConfig -Path $OpenCodeConfigPath
 
   $SlimConfig = Get-Content -LiteralPath $SlimConfigPath -Raw | ConvertFrom-Json
-  $Preset = $SlimConfig.presets."generic-opencode-go"
-  $Preset.orchestrator.model = @(
-    [pscustomobject]@{ id = $Balanced },
-    [pscustomobject]@{ id = $Primary }
-  )
-  $Preset.oracle.model = @(
-    [pscustomobject]@{ id = $Primary },
-    [pscustomobject]@{ id = $Balanced }
-  )
-  $Preset.council.model = @(
-    [pscustomobject]@{ id = $Primary },
-    [pscustomobject]@{ id = $Balanced }
-  )
-  $Preset.explorer.model = @(
-    [pscustomobject]@{ id = $Balanced },
-    [pscustomobject]@{ id = $Primary }
-  )
-  $Preset.librarian.model = @(
-    [pscustomobject]@{ id = $Balanced },
-    [pscustomobject]@{ id = $Primary }
-  )
-  $Preset.fixer.model = @(
-    [pscustomobject]@{ id = $Primary },
-    [pscustomobject]@{ id = $Balanced }
-  )
-  $Preset.designer.model = @(
-    [pscustomobject]@{ id = $Balanced },
-    [pscustomobject]@{ id = $Primary }
-  )
+  $SlimConfig.preset = $ProfileName
+  foreach ($PresetName in @("balanced", "quality")) {
+    $Preset = $SlimConfig.presets.$PresetName
+    $Preset.orchestrator.model = @(
+      [pscustomobject]@{ id = $Balanced },
+      [pscustomobject]@{ id = $Primary }
+    )
+    $Preset.oracle.model = @(
+      [pscustomobject]@{ id = $Primary },
+      [pscustomobject]@{ id = $Balanced }
+    )
+    $Preset.council.model = @(
+      [pscustomobject]@{ id = $Primary },
+      [pscustomobject]@{ id = $Balanced }
+    )
+    $Preset.explorer.model = @(
+      [pscustomobject]@{ id = $Balanced },
+      [pscustomobject]@{ id = $Primary }
+    )
+    $Preset.librarian.model = @(
+      [pscustomobject]@{ id = $Balanced },
+      [pscustomobject]@{ id = $Primary }
+    )
+    $Preset.fixer.model = @(
+      [pscustomobject]@{ id = $Primary },
+      [pscustomobject]@{ id = $Balanced }
+    )
+    $Preset.designer.model = @(
+      [pscustomobject]@{ id = $Balanced },
+      [pscustomobject]@{ id = $Primary }
+    )
+  }
 
   $SlimConfig.agents."code-reviewer".model = $Primary
   $SlimConfig.agents."code-reviewer".PSObject.Properties.Remove("variant")
@@ -201,6 +244,34 @@ function Apply-ModelChoices {
   $CouncilPreset."security-review".model = $Balanced
   $CouncilPreset."security-review".PSObject.Properties.Remove("variant")
   ConvertTo-PrettyJsonFile -InputObject $SlimConfig -Path $SlimConfigPath
+}
+
+$SelectedProfile = $Profile.Trim().ToLowerInvariant()
+if ($SelectedProfile -ne "" -and $SelectedProfile -notin @("balanced", "quality")) {
+  throw "Profile must be 'balanced' or 'quality'."
+}
+
+if ($SelectedProfile -eq "") {
+  if ($NonInteractive) {
+    $SelectedProfile = "balanced"
+  } else {
+    while ($true) {
+      $ProfileAnswer = (Read-Host "Choose curated profile: 1 = balanced, 2 = quality [Enter = balanced]").Trim().ToLowerInvariant()
+      if ($ProfileAnswer -in @("", "1", "balanced")) {
+        $SelectedProfile = "balanced"
+        break
+      }
+      if ($ProfileAnswer -in @("2", "quality")) {
+        $SelectedProfile = "quality"
+        break
+      }
+      Write-Host "Invalid profile. Choose 1/balanced or 2/quality."
+    }
+  }
+}
+
+if ($env:OH_MY_OPENCODE_SLIM_PRESET -and $env:OH_MY_OPENCODE_SLIM_PRESET.Trim().ToLowerInvariant() -ne $SelectedProfile) {
+  Write-Warning "OH_MY_OPENCODE_SLIM_PRESET overrides Slim at runtime. Set it to '$SelectedProfile' or unset it to use the installed profile."
 }
 
 if (-not (Test-Path -LiteralPath $ProjectPath -PathType Container)) {
@@ -224,6 +295,7 @@ if (-not (Test-Path -LiteralPath $Destination)) {
 }
 
 Get-ChildItem -LiteralPath $Source -Force | Copy-Item -Destination $Destination -Recurse -Force
+Apply-CuratedProfile -DestinationPath $Destination -ProfileName $SelectedProfile
 
 $CustomizeRouting = $false
 
@@ -231,7 +303,7 @@ if (-not $NonInteractive) {
   ""
   "Interactive model routing"
   "Provider queried: $Provider"
-  $CustomizeAnswer = Read-Host "Replace curated specialist routing with two selected models? [y/N]"
+  $CustomizeAnswer = Read-Host "Replace the '$SelectedProfile' profile with two selected models? [y/N]"
   if ($CustomizeAnswer.Trim() -match "^(y|yes)$") {
     $CustomizeRouting = $true
   }
@@ -251,7 +323,7 @@ if ($CustomizeRouting) {
     $SelectedModels[$Slot["Key"]] = Select-Model -Slot $Slot -AvailableModels $AvailableModels
   }
 
-  Apply-ModelChoices -DestinationPath $Destination -Models $SelectedModels
+  Apply-ModelChoices -DestinationPath $Destination -Models $SelectedModels -ProfileName $SelectedProfile
 }
 
 "Installed OpenCode Go generic project config to $Destination"
@@ -262,7 +334,7 @@ if ($CustomizeRouting) {
     "  $($Slot["Key"]): $($SelectedModels[$Slot["Key"]])"
   }
 } else {
-  "  curated specialist defaults"
+  "  $SelectedProfile curated profile"
 }
 ""
 "Restart OpenCode in the target project so it loads the new config."

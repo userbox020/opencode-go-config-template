@@ -17,54 +17,64 @@ No API keys, RPC endpoints, private keys, or project-specific paths are included
 ## Defaults
 
 - Enabled provider is `opencode-go`.
-- Default `model` is `opencode-go/qwen3.7-plus` and `small_model` is `opencode-go/deepseek-v4-flash`.
-- Core routing uses Kimi K2.7 Code for `build`, GLM-5.2 (`max`) for `plan`, Qwen3.7 Plus for `general`, and DeepSeek V4 Flash (`high`) for `explore`. Title, summary, and compaction use DeepSeek V4 Flash without a reasoning variant; compaction retains 6 tail turns.
-- `oh-my-opencode-slim` is pinned to `2.2.8` with plugin-managed auto-updates disabled. Updates are deliberate and reproducible.
-- Plugin routing uses MiniMax M3 (`thinking`) for orchestration, Qwen3.7 Max (`max`) for Oracle, GLM-5.2 (`max`) for council synthesis, DeepSeek V4 Flash (`high`) for exploration, research, tests, and scoped implementation, Kimi K2.7 Code for UI work, and MiMo V2.5 for visual observation.
-- Observer is enabled with automatic image routing. Its fallback is the multimodal Qwen3.7 Plus model.
-- Custom reviewers use Qwen3.7 Max, GLM-5.2, and DeepSeek V4 Pro with model-family fallbacks. The review council uses those three families for correctness, architecture, and security perspectives.
+- The checked-in template and normal installs use the balanced profile. Its default `model` is `opencode-go/qwen3.8-flash` and `small_model` is `opencode-go/longcat-2.0`.
+- Balanced core routing uses Kimi K2.7 Code for `build`, GLM-5.3 Flash (`max`) for `plan`, Qwen3.8 Flash (`medium`) for `general`, and LongCat 2.0 (`medium`) for `explore`. Title, summary, and compaction use LongCat 2.0 (`low`); compaction retains 6 tail turns.
+- A quality profile is available through both installers. It uses Qwen3.8 Max for general work and orchestration, full GLM-5.3 (`max`) for planning, and Qwen3.8 Flash for high-volume support work while retaining Kimi K2.7 Code for implementation.
+- `oh-my-opencode-slim` is pinned to `2.2.17` with plugin-managed auto-updates disabled. Periodic orchestrator wake-ups are explicitly disabled to keep usage predictable.
+- Balanced plugin routing uses MiniMax M3 (`thinking`) for orchestration, premium Qwen3.8 Max only for Oracle and correctness review, GLM-5.3 Flash for council synthesis, LongCat 2.0 for exploration and research, Kimi K2.7 Code for implementation and UI work, and MiMo V2.5 for visual observation.
+- Quality plugin routing uses Qwen3.8 Max for orchestration, Oracle, review, and visual fallback; full GLM-5.3 for architecture and council synthesis; Qwen3.8 Flash for exploration and research; and Kimi K2.7 Code for implementation.
+- Observer is enabled with automatic image routing. Balanced uses MiMo V2.5 with Qwen3.8 Flash fallback; quality uses Qwen3.8 Max with MiMo V2.5 fallback.
+- Custom reviewers use Qwen3.8 Max, GLM-5.3, and DeepSeek V4 Pro with model-family fallbacks. The review council uses those three families for correctness, architecture, and security perspectives.
 - Model fallback retries once before moving through a configured chain. Unsupported generic variants are intentionally omitted instead of being silently ignored by OpenCode.
-- Normal and non-interactive installs preserve these curated defaults. Explicit two-model customization replaces text-agent routing but leaves the vision-capable Observer route intact.
+- Normal and non-interactive installs preserve balanced defaults unless quality is explicitly selected. Two-model customization replaces text-agent routing but leaves the vision-capable Observer route intact.
 - Secret-like files are read-gated and edit-denied by default.
 - Risky shell operations such as `git push`, package publish, production deploy, `kubectl`, `terraform apply`, `pulumi up`, live transaction broadcasts, and destructive cleanup ask first.
 
 ## Role Policy
 
 - **MiniMax M3** for orchestration, coordination, and workflow judgment.
-- **Qwen3.7 Max** for Oracle work, difficult reasoning, and correctness review.
-- **GLM-5.2** for planning, architecture, council synthesis, and migration review.
-- **DeepSeek V4 Flash** for high-volume exploration, documentation, tests, summaries, and scoped implementation.
+- **Qwen3.8 Flash** for balanced general work, exploration fallback, tests, and visual fallback.
+- **Qwen3.8 Max** for quality orchestration, Oracle work, difficult reasoning, and correctness review.
+- **GLM-5.3 Flash** for balanced planning and council synthesis.
+- **GLM-5.3** for quality planning, architecture, council synthesis, and migration review.
+- **LongCat 2.0** for high-volume exploration, documentation, titles, summaries, and compaction.
+- **DeepSeek V4 Flash** for economical exploration fallback.
 - **Kimi K2.7 Code** for code-specialized implementation and UI work.
 - **MiMo V2.5** for screenshots, images, video, and visual analysis.
 - **DeepSeek V4 Pro** for defensive security review and deep escalation.
-- **Qwen3.7 Plus** for balanced general work and orchestration fallback.
 
 ## Requirements
 
-- OpenCode installed and available as `opencode` or `opencode.cmd`. Version `1.18.9` or newer is recommended.
-- npm package access so OpenCode can load the pinned `oh-my-opencode-slim@2.2.8` plugin.
+- OpenCode installed and available as `opencode` or `opencode.cmd`. Version `1.18.25` or newer is recommended.
+- npm package access so OpenCode can load the pinned `oh-my-opencode-slim@2.2.17` plugin.
 - An active OpenCode Go subscription.
-- Node.js or Python 3 is only required by the macOS/Linux installer when explicit two-model customization is selected.
+- Node.js or Python 3 is required by the macOS/Linux installer for the quality profile or explicit two-model customization.
 
-OpenCode Go costs **$5 for the first month**, then **$10/month**. Its included usage limits are **$12 per rolling 5 hours**, **$30 per week**, and **$60 per month**. Some premium models receive a lower monthly allowance. The provider does not publish RPM, TPM, concurrency, or latency SLA limits.
+OpenCode Go costs **$10/month**. Its included usage limits are **$12 per rolling 5 hours**, **$30 per week**, and **$60 per month**. Some premium models receive a lower monthly allowance. The provider does not publish RPM, TPM, concurrency, or latency SLA limits.
 
 ## Current Go Catalog
 
-As of July 29, 2026, `opencode models opencode-go` returns these 16 active IDs:
+As of August 30, 2026, `opencode models opencode-go` returns these 25 active IDs:
 
-- `deepseek-v4-flash`, `deepseek-v4-pro`
-- `glm-5.1`, `glm-5.2`, `grok-4.5`, `hy3`
+- `deepseek-v4-flash`, `deepseek-v4-flash-vision-exp`, `deepseek-v4-pro`
+- `glm-5.1`, `glm-5.2`, `glm-5.3`, `glm-5.3-flash`
+- `gpt-5.6-luna`, `grok-4.6`
+- `hy3`, `hy4-preview`
 - `kimi-k2.6`, `kimi-k2.7-code`, `kimi-k3`
+- `longcat-2.0`
 - `mimo-v2.5`, `mimo-v2.5-pro`
 - `minimax-m2.7`, `minimax-m3`
-- `qwen3.6-plus`, `qwen3.7-max`, `qwen3.7-plus`
+- `muse-spark-1.2-contributor`
+- `qwen3.6-plus`, `qwen3.7-max`, `qwen3.7-plus`, `qwen3.8-flash`, `qwen3.8-max`
 
-Kimi K3 and Grok 4.5 are not default routes because their Go allowances are much lower than the balanced specialist models. The installer queries `opencode models opencode-go` only when interactive customization is selected. Catalog presence does not guarantee runtime availability. If your setup uses different model names, select them during install or edit both:
+Muse Spark Contributor is not a default because prompts and completions may be used for training and availability is region-limited. Grok 4.6 and GPT 5.6 Luna retain data for up to 30 days. Kimi K3, Qwen3.8 Max, full GLM-5.3, and DeepSeek V4 Pro have lower monthly allowances, so the balanced profile reserves the latter three for infrequent specialist work. Hy4 remains a preview, and DeepSeek V4 Flash Vision remains experimental and lacks video input, so neither replaces the stable Observer route.
+
+The installer queries `opencode models opencode-go` only when interactive customization is selected. Catalog presence does not guarantee runtime availability. If your setup uses different model names, select them during install or edit both:
 
 - `template/.opencode/opencode.jsonc`
 - `template/.opencode/oh-my-opencode-slim.jsonc`
 
-Primary references are the [OpenCode Go documentation](https://opencode.ai/docs/go/), the live `opencode models opencode-go` catalog, and the [`oh-my-opencode-slim` v2.2.8 release](https://github.com/alvinunreal/oh-my-opencode-slim/releases/tag/v2.2.8).
+Primary references are the [OpenCode Go documentation](https://opencode.ai/docs/go/), the live `opencode models opencode-go` catalog, and the [`oh-my-opencode-slim` v2.2.17 release](https://github.com/alvinunreal/oh-my-opencode-slim/releases/tag/v2.2.17).
 
 ## Install Into A Project
 
@@ -74,7 +84,7 @@ From this repo on Windows:
 powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -ProjectPath C:\path\to\your-project
 ```
 
-The installer preserves curated specialist routing by default. If you explicitly choose two-model customization, it shows each routing slot, a short description, its default, and the numbered models returned by OpenCode.
+Press Enter at the profile prompt to install the balanced profile. The installer can instead generate the quality profile or replace text-agent routing with two models selected from OpenCode's catalog.
 
 From this repo on macOS/Linux:
 
@@ -98,14 +108,30 @@ FORCE=1 bash ./scripts/install.sh /path/to/your-project
 
 Force mode merges and overwrites matching template files. It does not delete extra files in the target `.opencode` directory.
 
-## Interactive Model Routing
+## Routing Profiles
 
-Press Enter at the routing prompt to keep the recommended specialist mapping. Choose customization only when you want to replace text-agent routing with two models:
+Balanced is the default for interactive and non-interactive installs. Select quality explicitly when higher reasoning quality is worth using premium allowances more quickly.
 
-- `primary`: defaults to `opencode-go/glm-5.2` for planning, fixing, Oracle, architecture, and high-stakes specialist work.
-- `balanced`: defaults to `opencode-go/qwen3.7-plus` for routine orchestration, general work, exploration, docs, design, titles, summaries, and compaction.
+Windows quality profile:
 
-Custom routing omits model variants because variant names are provider-specific. The curated MiMo V2.5 Observer route is retained so arbitrary text-only choices do not break image handling.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -ProjectPath C:\path\to\your-project -Profile quality
+```
+
+macOS/Linux quality profile:
+
+```bash
+bash ./scripts/install.sh /path/to/your-project --profile quality
+```
+
+The checked-in template is balanced. The quality installer changes core OpenCode routing and selects the `quality` Slim preset. Re-run the installer with force mode and the desired profile to switch an installed project. A runtime `OH_MY_OPENCODE_SLIM_PRESET` override changes only Slim agents; rerun the installer to keep core OpenCode agents aligned.
+
+After selecting a curated profile, interactive installs offer optional two-model customization:
+
+- `primary`: defaults to `opencode-go/glm-5.3-flash` for planning, fixing, Oracle, architecture, and high-stakes specialist work.
+- `balanced`: defaults to `opencode-go/qwen3.8-flash` for routine orchestration, general work, exploration, docs, design, titles, summaries, and compaction.
+
+Custom routing omits model variants because variant names are provider-specific. It enables the selected providers alongside `opencode-go`, applies the custom text routes to both Slim presets so runtime overrides remain consistent, and retains each preset's curated Observer route.
 
 Use a different provider model list:
 
@@ -117,7 +143,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -ProjectPath C:\p
 bash ./scripts/install.sh /path/to/your-project --provider opencode-go
 ```
 
-Skip prompts and keep curated specialist defaults for automation:
+Skip prompts and install balanced for automation:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -ProjectPath C:\path\to\your-project -NonInteractive
@@ -127,7 +153,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -ProjectPath C:\p
 bash ./scripts/install.sh /path/to/your-project --non-interactive
 ```
 
-You can also set `OPENCODE_MODEL_PROVIDER` for the Unix installer, or `OPENCODE_BIN` if your OpenCode binary has a custom name.
+Use `-NonInteractive -Profile quality` or `--non-interactive --profile quality` for automated quality installs. `OH_MY_OPENCODE_SLIM_PRESET` overrides Slim at runtime, so the installers warn when it conflicts with the selected profile. The Unix installer also accepts `OPENCODE_MODEL_PROVIDER` and `OPENCODE_BIN`.
 
 ## Validate After Install
 
@@ -138,19 +164,23 @@ opencode models --refresh
 opencode debug config
 opencode debug agent orchestrator
 opencode debug skill
-npx oh-my-opencode-slim@2.2.8 doctor
+npx oh-my-opencode-slim@2.2.17 doctor
 ```
 
-Run a live model smoke test for each verified OpenCode Go ID if desired:
+The published OpenCode JSON schema can lag the live Go catalog and may temporarily flag newly added model IDs as enum errors. `opencode models opencode-go` plus a successful `opencode debug config` are the authoritative runtime checks for dynamic Go IDs; the Slim 2.2.17 schema should validate without exceptions.
+
+Live smoke tests consume Go usage. These commands cover the models used by the curated profiles:
 
 ```bash
-opencode run --agent build -m opencode-go/qwen3.7-plus "Respond with exactly: ROUTING_OK_QWEN"
-opencode run --agent build -m opencode-go/qwen3.7-max "Respond with exactly: ROUTING_OK_QWEN_MAX"
-opencode run --agent build -m opencode-go/deepseek-v4-flash "Respond with exactly: ROUTING_OK_FLASH"
-opencode run --agent build -m opencode-go/glm-5.2 "Respond with exactly: ROUTING_OK_GLM"
+opencode run --agent build -m opencode-go/qwen3.8-flash --variant medium "Respond with exactly: ROUTING_OK_QWEN_FLASH"
+opencode run --agent build -m opencode-go/qwen3.8-max --variant xhigh "Respond with exactly: ROUTING_OK_QWEN_MAX"
+opencode run --agent build -m opencode-go/longcat-2.0 --variant medium "Respond with exactly: ROUTING_OK_LONGCAT"
+opencode run --agent build -m opencode-go/glm-5.3-flash --variant max "Respond with exactly: ROUTING_OK_GLM_FLASH"
+opencode run --agent build -m opencode-go/glm-5.3 --variant max "Respond with exactly: ROUTING_OK_GLM"
 opencode run --agent build -m opencode-go/kimi-k2.7-code "Respond with exactly: ROUTING_OK_KIMI"
-opencode run --agent build -m opencode-go/deepseek-v4-pro "Respond with exactly: ROUTING_OK_PRO"
-opencode run --agent build -m opencode-go/minimax-m3 "Respond with exactly: ROUTING_OK_MINIMAX"
+opencode run --agent build -m opencode-go/deepseek-v4-flash --variant high "Respond with exactly: ROUTING_OK_DEEPSEEK_FLASH"
+opencode run --agent build -m opencode-go/deepseek-v4-pro --variant max "Respond with exactly: ROUTING_OK_DEEPSEEK_PRO"
+opencode run --agent build -m opencode-go/minimax-m3 --variant thinking "Respond with exactly: ROUTING_OK_MINIMAX"
 opencode run --agent build -m opencode-go/mimo-v2.5 "Respond with exactly: ROUTING_OK_MIMO"
 ```
 

@@ -1,23 +1,23 @@
 {
-  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.2.8/oh-my-opencode-slim.schema.json",
-  "preset": "generic-opencode-go",
+  "$schema": "https://unpkg.com/oh-my-opencode-slim@2.2.17/oh-my-opencode-slim.schema.json",
+  "preset": "balanced",
   "autoUpdate": false,
   "disabled_agents": [],
   "image_routing": "auto",
   "fallback": {
     "enabled": true,
-    "timeoutMs": 30000,
-    "retryDelayMs": 500,
-    "maxRetries": 1,
-    "retry_on_empty": true
+    "maxRetries": 1
   },
   "backgroundJobs": {
     "maxSessionsPerAgent": 3,
     "readContextMinLines": 10,
-    "readContextMaxFiles": 12
+    "readContextMaxFiles": 12,
+    "orchestratorWake": {
+      "enabled": false
+    }
   },
   "presets": {
-    "generic-opencode-go": {
+    "balanced": {
       "orchestrator": {
         "model": [
           {
@@ -25,23 +25,21 @@
             "variant": "thinking"
           },
           {
-            "id": "opencode-go/qwen3.7-plus"
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
           }
         ],
-        "skills": [
-          "project-workflow"
-        ],
+        "skills": ["project-workflow"],
         "mcps": []
       },
       "oracle": {
         "model": [
           {
-            "id": "opencode-go/qwen3.7-max",
-            "variant": "max"
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "xhigh"
           },
           {
-            "id": "opencode-go/glm-5.2",
-            "variant": "max"
+            "id": "opencode-go/qwen3.7-max"
           }
         ],
         "skills": [],
@@ -50,11 +48,11 @@
       "council": {
         "model": [
           {
-            "id": "opencode-go/glm-5.2",
+            "id": "opencode-go/glm-5.3-flash",
             "variant": "max"
           },
           {
-            "id": "opencode-go/deepseek-v4-pro",
+            "id": "opencode-go/glm-5.2",
             "variant": "max"
           }
         ],
@@ -64,26 +62,26 @@
       "explorer": {
         "model": [
           {
-            "id": "opencode-go/deepseek-v4-flash",
-            "variant": "high"
+            "id": "opencode-go/longcat-2.0",
+            "variant": "medium"
           },
           {
-            "id": "opencode-go/minimax-m2.7"
+            "id": "opencode-go/deepseek-v4-flash",
+            "variant": "high"
           }
         ],
-        "skills": [
-          "project-workflow"
-        ],
+        "skills": ["project-workflow"],
         "mcps": []
       },
       "librarian": {
         "model": [
           {
-            "id": "opencode-go/deepseek-v4-flash",
-            "variant": "high"
+            "id": "opencode-go/longcat-2.0",
+            "variant": "low"
           },
           {
-            "id": "opencode-go/mimo-v2.5"
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "low"
           }
         ],
         "skills": [],
@@ -92,16 +90,14 @@
       "fixer": {
         "model": [
           {
-            "id": "opencode-go/deepseek-v4-flash",
-            "variant": "high"
+            "id": "opencode-go/kimi-k2.7-code"
           },
           {
-            "id": "opencode-go/kimi-k2.7-code"
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
           }
         ],
-        "skills": [
-          "project-workflow"
-        ],
+        "skills": ["project-workflow"],
         "mcps": []
       },
       "designer": {
@@ -110,8 +106,8 @@
             "id": "opencode-go/kimi-k2.7-code"
           },
           {
-            "id": "opencode-go/minimax-m3",
-            "variant": "thinking"
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
           }
         ],
         "skills": [],
@@ -123,7 +119,119 @@
             "id": "opencode-go/mimo-v2.5"
           },
           {
-            "id": "opencode-go/qwen3.7-plus"
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      }
+    },
+    "quality": {
+      "orchestrator": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "medium"
+          },
+          {
+            "id": "opencode-go/minimax-m3",
+            "variant": "thinking"
+          }
+        ],
+        "skills": ["project-workflow"],
+        "mcps": []
+      },
+      "oracle": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "xhigh"
+          },
+          {
+            "id": "opencode-go/glm-5.3",
+            "variant": "max"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      },
+      "council": {
+        "model": [
+          {
+            "id": "opencode-go/glm-5.3",
+            "variant": "max"
+          },
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "xhigh"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      },
+      "explorer": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
+          },
+          {
+            "id": "opencode-go/longcat-2.0",
+            "variant": "high"
+          }
+        ],
+        "skills": ["project-workflow"],
+        "mcps": []
+      },
+      "librarian": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-flash",
+            "variant": "medium"
+          },
+          {
+            "id": "opencode-go/longcat-2.0",
+            "variant": "high"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      },
+      "fixer": {
+        "model": [
+          {
+            "id": "opencode-go/kimi-k2.7-code"
+          },
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "medium"
+          }
+        ],
+        "skills": ["project-workflow"],
+        "mcps": []
+      },
+      "designer": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "medium"
+          },
+          {
+            "id": "opencode-go/kimi-k2.7-code"
+          }
+        ],
+        "skills": [],
+        "mcps": []
+      },
+      "observer": {
+        "model": [
+          {
+            "id": "opencode-go/qwen3.8-max",
+            "variant": "medium"
+          },
+          {
+            "id": "opencode-go/mimo-v2.5"
           }
         ],
         "skills": [],
@@ -135,17 +243,14 @@
     "code-reviewer": {
       "model": [
         {
-          "id": "opencode-go/qwen3.7-max",
-          "variant": "max"
+          "id": "opencode-go/qwen3.8-max",
+          "variant": "xhigh"
         },
         {
-          "id": "opencode-go/deepseek-v4-pro",
-          "variant": "max"
+          "id": "opencode-go/qwen3.7-max"
         }
       ],
-      "skills": [
-        "project-workflow"
-      ],
+      "skills": ["project-workflow"],
       "mcps": [],
       "prompt": "You are a pragmatic code reviewer for authorized project work. Focus on correctness, regressions, maintainability, dependency risk, test gaps, edge cases, data migrations, concurrency, error handling, and operational safety. Return findings first, ordered by severity, with file and line references where available. Do not rewrite unrelated code or expand scope beyond the requested review.",
       "orchestratorPrompt": "@code-reviewer\n- Role: General code-review specialist for diffs, implementation plans, patches, refactors, and test quality.\n- Delegate when: a change needs second-pass review for correctness, maintainability, regressions, edge cases, or missing tests.\n- Expected output: findings ordered by severity, affected files, rationale, suggested fixes, and residual risks.\n- Do not delegate when: broad repository discovery or initial implementation is still needed."
@@ -153,17 +258,15 @@
     "repo-architect": {
       "model": [
         {
-          "id": "opencode-go/glm-5.2",
+          "id": "opencode-go/glm-5.3",
           "variant": "max"
         },
         {
-          "id": "opencode-go/qwen3.7-max",
+          "id": "opencode-go/glm-5.2",
           "variant": "max"
         }
       ],
-      "skills": [
-        "project-workflow"
-      ],
+      "skills": ["project-workflow"],
       "mcps": [],
       "prompt": "You are a software architecture reviewer for authorized project work. Analyze module boundaries, ownership, coupling, data flow, API contracts, migrations, deployment impact, and long-term maintainability. Prefer small reversible changes unless the user explicitly asks for a larger redesign. Return tradeoffs, risks, and a concrete implementation path.",
       "orchestratorPrompt": "@repo-architect\n- Role: Architecture and migration reviewer for module boundaries, API contracts, data flow, and technical tradeoffs.\n- Delegate when: the user asks for design choices, large refactors, migrations, dependency boundaries, or implementation sequencing.\n- Expected output: recommended approach, alternatives, risks, migration steps, and verification plan.\n- Do not delegate when: the task is a small isolated edit."
@@ -171,16 +274,14 @@
     "test-writer": {
       "model": [
         {
-          "id": "opencode-go/deepseek-v4-flash",
-          "variant": "high"
+          "id": "opencode-go/qwen3.8-flash",
+          "variant": "medium"
         },
         {
           "id": "opencode-go/kimi-k2.7-code"
         }
       ],
-      "skills": [
-        "project-workflow"
-      ],
+      "skills": ["project-workflow"],
       "mcps": [],
       "prompt": "You are a test-design specialist for authorized project work. Identify meaningful unit, integration, regression, property, and end-to-end tests based on the repository's existing framework. Prefer minimal high-signal tests over brittle broad snapshots. Include setup data, edge cases, failure cases, and how to run the tests.",
       "orchestratorPrompt": "@test-writer\n- Role: Test strategy and regression coverage specialist.\n- Delegate when: new code needs targeted tests, a bug needs reproduction, or existing coverage needs gap analysis.\n- Expected output: concrete tests to add, fixtures, edge cases, expected failures, and commands to run.\n- Do not delegate when: the repository's test framework has not been identified yet."
@@ -192,13 +293,11 @@
           "variant": "max"
         },
         {
-          "id": "opencode-go/glm-5.2",
+          "id": "opencode-go/glm-5.3",
           "variant": "max"
         }
       ],
-      "skills": [
-        "project-workflow"
-      ],
+      "skills": ["project-workflow"],
       "mcps": [],
       "prompt": "You are a defensive security reviewer for repositories and systems the user is authorized to review. Focus on authentication, authorization, secrets handling, injection, unsafe deserialization, SSRF, path traversal, dependency risk, crypto misuse, supply chain, deployment, logging, and data exposure. Do not provide instructions for attacking third-party systems, persistence, evasion, credential theft, or live exploitation. Reframe unsafe requests into defensive validation and remediation.",
       "orchestratorPrompt": "@security-reviewer\n- Role: Defensive application and infrastructure security reviewer.\n- Delegate when: code or configuration needs review for auth, secrets, injection, unsafe IO, dependencies, deployment, logging, or data exposure.\n- Expected output: scoped findings, severity, affected files, exploit preconditions at a high level, tests, and mitigations.\n- Do not delegate when: the request asks for public-target exploitation, credential theft, persistence, evasion, or live abuse."
@@ -209,12 +308,12 @@
     "presets": {
       "generic-review-board": {
         "correctness-review": {
-          "model": "opencode-go/qwen3.7-max",
-          "variant": "max",
+          "model": "opencode-go/qwen3.8-max",
+          "variant": "xhigh",
           "prompt": "Review the proposed change for correctness, regressions, edge cases, and test adequacy. Keep findings concrete and scoped."
         },
         "architecture-review": {
-          "model": "opencode-go/glm-5.2",
+          "model": "opencode-go/glm-5.3",
           "variant": "max",
           "prompt": "Review module boundaries, maintainability, migration risk, and operational safety. Keep tradeoffs concrete."
         },
